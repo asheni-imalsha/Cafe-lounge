@@ -42,10 +42,8 @@
     </form>
   </div>
 
-  <div class="hidden md:flex flex-col items-center justify-center gap-4 p-6 rounded-lg cl-card">
-    <h3 class="text-lg font-semibold" style="color:var(--espresso)">Welcome to Cafe Lounge</h3>
-    <p class="text-sm" style="color:var(--latte)">Book spaces, order from the cafe, and keep your cart across devices.</p>
-    <img src="../images/register-illustration.png" alt="Welcome" style="width:220px;height:auto" />
+  <div class="hidden md:block rounded-lg overflow-hidden shadow-lg">
+    <img src="https://images.pexels.com/photos/15800347/pexels-photo-15800347.jpeg" alt="Welcome" style="width:100%;height:100%;object-fit:cover;min-height:400px" />
   </div>
 </div>
 

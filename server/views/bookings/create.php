@@ -48,19 +48,41 @@ if (empty($spaceTypes)) {
     </div>
   </div>
 
-  <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-    <div class="glass-card reveal">
-      <h3 class="font-semibold mb-2">How it works</h3>
-      <p class="text-sm" style="color:var(--latte)">Choose a space name, pick a type and select date/time for your booking. You can view and manage your bookings from the 'My Bookings' page.</p>
-    </div>
+  <div class="glass-card reveal mb-4">
+    <h3 class="font-semibold mb-2">How it works</h3>
+    <p class="text-sm" style="color:var(--latte)">Choose a space name, pick a type and select date/time for your booking. You can view and manage your bookings from the 'My Bookings' page.</p>
+  </div>
 
-    <div class="glass-card reveal">
-      <h3 class="font-semibold mb-2">Available space types</h3>
-      <div class="flex flex-wrap gap-2">
-        <?php foreach($spaceTypes as $s): $display = ucwords($s); ?>
-          <span class="px-3 py-1 rounded-full" style="background:var(--sand);color:var(--espresso)"><?= htmlspecialchars($display) ?></span>
-        <?php endforeach; ?>
+  <div class="glass-card reveal">
+    <h3 class="font-semibold mb-4">Available space types</h3>
+    <div class="relative">
+      <button id="spaceTypesPrev" class="scroller-btn left" aria-label="Previous">‹</button>
+      <div id="spaceTypesScroller" class="horizontal-scroller">
+        <div class="scroller-list">
+        <?php
+        // map space type names (lowercase) to external image URLs
+        $spaceImageMap = [
+          'desk' => 'https://images.pexels.com/photos/12804511/pexels-photo-12804511.jpeg',
+          'study desks' => 'https://images.pexels.com/photos/7681682/pexels-photo-7681682.jpeg',
+          'meeting room' => 'https://images.pexels.com/photos/14683759/pexels-photo-14683759.jpeg',
+          'rooftop lounge' => 'https://images.pexels.com/photos/7214339/pexels-photo-7214339.jpeg',
+          'group space' => 'https://images.pexels.com/photos/6399033/pexels-photo-6399033.jpeg',
+          'outdoor space' => 'https://images.pexels.com/photos/29898382/pexels-photo-29898382.jpeg',
+          'outdoor swing' => 'https://images.pexels.com/photos/31774137/pexels-photo-31774137.jpeg',
+        ];
+
+        foreach($spaceTypes as $s){
+          $typeName = strtolower($s ?? '');
+          $img = $spaceImageMap[$typeName] ?? 'images/space_placeholder.png';
+          echo "<div class=\"space-card rounded-lg cl-card p-3 reveal\">";
+          echo "<div class='h-36 overflow-hidden rounded-md mb-2'><img src='{$img}' style='width:100%;height:100%;object-fit:cover' alt='".htmlspecialchars($s)."' /></div>";
+          echo "<div class='font-semibold' style='color:var(--espresso)'>".htmlspecialchars(ucwords($s))."</div>";
+          echo "</div>";
+        }
+        ?>
+        </div>
       </div>
+      <button id="spaceTypesNext" class="scroller-btn right" aria-label="Next">›</button>
     </div>
   </div>
 
@@ -80,7 +102,7 @@ if (empty($spaceTypes)) {
                 <div class="text-sm" style="color:var(--latte)">Time: <?= htmlspecialchars($b['start_time'] ?? '') ?> - <?= htmlspecialchars($b['end_time'] ?? '') ?></div>
               </div>
               <div class="flex flex-col gap-2">
-                <a href="booking_edit.php?id=<?= (int)$b['id'] ?>" class="px-3 py-1 border rounded-full text-sm nav-link">Edit</a>
+                <button class="px-3 py-1 border rounded-full text-sm nav-link edit-booking-btn" data-id="<?= (int)$b['id'] ?>" data-name="<?= htmlspecialchars($b['space_name']) ?>" data-type="<?= htmlspecialchars($b['space_type']) ?>" data-date="<?= htmlspecialchars($b['booking_date']) ?>" data-start="<?= htmlspecialchars($b['start_time'] ?? '') ?>" data-end="<?= htmlspecialchars($b['end_time'] ?? '') ?>">Edit</button>
                 <a href="booking_delete.php?id=<?= (int)$b['id'] ?>" class="px-3 py-1 rounded-full text-sm confirm-delete" style="background:#f8d7da;color:#842029;text-align:center">Delete</a>
               </div>
             </div>
@@ -139,6 +161,59 @@ if (empty($spaceTypes)) {
     </div>
   </div>
 </div>
+
+<!-- Edit Modal (centered) -->
+<div id="editModal" class="fixed inset-0 bg-black bg-opacity-40 hidden flex items-center justify-center z-50 p-6">
+    <div class="glass-card rounded-3xl p-6 w-full max-w-lg shadow-lg">
+      <div class="flex items-center justify-between mb-4">
+        <h3 class="text-lg font-semibold">Edit Booking</h3>
+        <button id="closeEditModal" class="text-gray-500">✕</button>
+      </div>
+      <form id="editBookingForm" method="post" action="" class="space-y-3">
+        <label class="block text-sm">Space name
+          <input id="edit_space_name" name="space_name" required class="w-full border p-3 rounded">
+        </label>
+        <label class="block text-sm">Space type
+          <input id="edit_space_type" name="space_type" class="w-full border p-3 rounded">
+        </label>
+        <label class="block text-sm">Date
+          <input type="date" id="edit_booking_date" name="booking_date" required class="w-full border p-3 rounded">
+        </label>
+        <div class="grid grid-cols-2 gap-3">
+          <label class="block text-sm">Start time
+            <input type="time" id="edit_start_time" name="start_time" required class="w-full border p-3 rounded">
+          </label>
+          <label class="block text-sm">End time
+            <input type="time" id="edit_end_time" name="end_time" required class="w-full border p-3 rounded">
+          </label>
+        </div>
+        <div class="flex items-center gap-3 mt-2">
+          <button type="submit" class="cl-btn px-4 py-2 rounded">
+            <svg xmlns="http://www.w3.org/2000/svg" class="inline-block mr-2" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2h11l5 5v9a2 2 0 0 1-2 2z"/></svg>
+            Save Changes
+          </button>
+          <button type="button" id="cancelEdit" class="px-3 py-2 border rounded">Cancel</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+<!-- Delete Confirmation Modal -->
+<div id="deleteModal" class="fixed inset-0 bg-black bg-opacity-40 hidden flex items-center justify-center z-50 p-6">
+    <div class="glass-card rounded-3xl p-6 w-full max-w-sm shadow-lg">
+      <div class="flex items-center justify-between mb-4">
+        <h3 class="text-lg font-semibold">Delete Booking</h3>
+        <button id="closeDeleteModal" class="text-gray-500">✕</button>
+      </div>
+      <p class="mb-6 text-gray-700">Are you sure you want to delete this booking? This action cannot be undone.</p>
+      <div class="flex items-center gap-3">
+        <button id="confirmDeleteBtn" class="px-4 py-2 rounded" style="background:#f8d7da;color:#842029;font-weight:500">
+          Delete
+        </button>
+        <button id="cancelDeleteBtn" class="px-4 py-2 border rounded">Cancel</button>
+      </div>
+    </div>
+  </div>
 
 <?php require_once __DIR__ . '/../partials/footer.php'; ?>
 
@@ -229,7 +304,93 @@ if (empty($spaceTypes)) {
   // run check when modal opens
   openBtn.addEventListener('click', ()=> setTimeout(checkAvailability, 200));
   // confirm delete links on the page
+  const deleteModal = document.getElementById('deleteModal');
+  const closeDeleteBtn = document.getElementById('closeDeleteModal');
+  const confirmDeleteBtn = document.getElementById('confirmDeleteBtn');
+  const cancelDeleteBtn = document.getElementById('cancelDeleteBtn');
+  let deleteUrl = '';
+
+  function showDeleteModal(url) {
+    deleteUrl = url;
+    deleteModal.classList.remove('hidden');
+  }
+
+  function hideDeleteModal() {
+    deleteModal.classList.add('hidden');
+    deleteUrl = '';
+  }
+
+  closeDeleteBtn.addEventListener('click', hideDeleteModal);
+  cancelDeleteBtn.addEventListener('click', hideDeleteModal);
+  deleteModal.addEventListener('click', (e) => {
+    if (e.target === deleteModal) hideDeleteModal();
+  });
+
+  confirmDeleteBtn.addEventListener('click', () => {
+    if (deleteUrl) {
+      window.location.href = deleteUrl;
+    }
+  });
+
   document.querySelectorAll('.confirm-delete').forEach(a=>{
-    a.addEventListener('click', function(e){ if (!confirm('Are you sure you want to delete this booking?')) e.preventDefault(); });
+    a.addEventListener('click', function(e){
+      e.preventDefault();
+      showDeleteModal(this.href);
+    });
+  });
+
+  // space types scroller functionality
+  const spaceTypesScroller = document.getElementById('spaceTypesScroller');
+  const spaceTypesPrevBtn = document.getElementById('spaceTypesPrev');
+  const spaceTypesNextBtn = document.getElementById('spaceTypesNext');
+  
+  if (spaceTypesScroller && spaceTypesPrevBtn && spaceTypesNextBtn) {
+    const scrollAmount = 300;
+    spaceTypesPrevBtn.addEventListener('click', () => {
+      spaceTypesScroller.scrollBy({ left: -scrollAmount, behavior: 'smooth' });
+    });
+    spaceTypesNextBtn.addEventListener('click', () => {
+      spaceTypesScroller.scrollBy({ left: scrollAmount, behavior: 'smooth' });
+    });
+  }
+
+  // Edit booking modal functionality
+  const editModal = document.getElementById('editModal');
+  const editForm = document.getElementById('editBookingForm');
+  const closeEditBtn = document.getElementById('closeEditModal');
+  const cancelEditBtn = document.getElementById('cancelEdit');
+  
+  function showEditModal(bookingId, spaceName, spaceType, bookingDate, startTime, endTime) {
+    document.getElementById('edit_space_name').value = spaceName;
+    document.getElementById('edit_space_type').value = spaceType;
+    document.getElementById('edit_booking_date').value = bookingDate;
+    document.getElementById('edit_start_time').value = startTime;
+    document.getElementById('edit_end_time').value = endTime;
+    editForm.action = 'booking_edit.php?id=' + encodeURIComponent(bookingId);
+    editModal.classList.remove('hidden');
+  }
+  
+  function hideEditModal() {
+    editModal.classList.add('hidden');
+  }
+  
+  closeEditBtn.addEventListener('click', hideEditModal);
+  cancelEditBtn.addEventListener('click', hideEditModal);
+  editModal.addEventListener('click', (e) => {
+    if (e.target === editModal) hideEditModal();
+  });
+  
+  // Edit booking button handlers
+  document.querySelectorAll('.edit-booking-btn').forEach(btn => {
+    btn.addEventListener('click', function(e) {
+      e.preventDefault();
+      const bookingId = this.dataset.id;
+      const spaceName = this.dataset.name;
+      const spaceType = this.dataset.type;
+      const bookingDate = this.dataset.date;
+      const startTime = this.dataset.start;
+      const endTime = this.dataset.end;
+      showEditModal(bookingId, spaceName, spaceType, bookingDate, startTime, endTime);
+    });
   });
 </script>

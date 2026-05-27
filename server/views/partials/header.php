@@ -7,6 +7,7 @@ require_once __DIR__ . '/../../src/auth.php';
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>Cafe Lounge</title>
+  <link rel="icon" type="image/png" href="images/logo.png">
   <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
   <style>
     :root{
@@ -36,7 +37,7 @@ require_once __DIR__ . '/../../src/auth.php';
     .cl-card{background:var(--glass-bg);backdrop-filter:blur(var(--glass-blur));border-radius:var(--radius-lg);box-shadow:0 10px 30px rgba(0,0,0,0.08)}
     .nav-link{color:var(--espresso);opacity:.92}
     .nav-link:hover{opacity:1;transform:translateY(-2px)}
-    .profile-menu{min-width:200px;background:var(--ivory);box-shadow:0 12px 36px rgba(0,0,0,.12);border-radius:12px;padding:.5rem}
+    .profile-menu{min-width:200px;background:var(--ivory);box-shadow:0 12px 36px rgba(0,0,0,.12);border-radius:12px;padding:.5rem;z-index:99999}
     .btn-icon{display:inline-flex;align-items:center;gap:.5rem;padding:.5rem 0.75rem;border-radius:12px}
     .badge{background:var(--sage);color:var(--ivory);padding:4px 8px;border-radius:999px;font-size:.75rem}
     .transition-smooth{transition:all .22s cubic-bezier(.2,.9,.2,1)}
@@ -44,7 +45,38 @@ require_once __DIR__ . '/../../src/auth.php';
     .card-hover{transition:transform .28s ease, box-shadow .28s ease}
     .card-hover:hover{transform:translateY(-8px);box-shadow:0 20px 40px rgba(0,0,0,0.12)}
     .rounded-xl-2{border-radius:20px}
-    .big-hero{width:100%;height:520px;object-fit:cover;border-radius:20px}
+    .big-hero{position:relative;width:100%;overflow:hidden;border-radius:20px}
+    .big-hero img{width:100%;height:420px;object-fit:cover;display:block}
+    .big-hero::after{content:'';position:absolute;inset:0;background:linear-gradient(rgba(255,255,255,0.6),rgba(255,255,255,0.12));pointer-events:none}
+
+    /* sticky header */
+    header{position:sticky;top:0;z-index:60;background:var(--ivory);backdrop-filter:blur(4px)}
+
+    /* hero left-side white card (overlays left of hero image) */
+    /* place a card covering ~1/3 of the hero image, top-left overlay */
+    .hero-card-left{position:absolute;left:1rem;top:1.25rem;transform:none;width:33.3333%;max-width:520px;min-width:260px;background:rgba(255,255,255,0.98);padding:1.5rem;border-radius:14px;box-shadow:0 18px 48px rgba(0,0,0,0.16);z-index:14}
+    .hero-card-left h1{margin:0}
+    @media (max-width:900px){
+      .big-hero img{height:360px}
+      .hero-card-left{position:static;transform:none;width:100%;margin-top:-64px;background:rgba(255,255,255,0.96)}
+    }
+    @media (max-width:520px){
+      .big-hero img{height:260px}
+      .hero-card-left{margin-top:-48px;padding:1rem;border-radius:10px}
+    }
+    /* horizontal scroller for Spaces section */
+    .horizontal-scroller{position:relative;height:260px;overflow-x:auto;overflow-y:hidden;padding-bottom:6px}
+    /* hide native scrollbar while keeping scroll functionality */
+    .horizontal-scroller{ -ms-overflow-style: none; scrollbar-width: none; }
+    .horizontal-scroller::-webkit-scrollbar{ height: 0; display: none; }
+    .horizontal-scroller .scroller-list{display:flex;flex-direction:row;gap:1rem;align-items:flex-start}
+    .space-card{min-width:240px;flex:0 0 240px}
+    .scroller-btn{position:absolute;width:44px;height:44px;border-radius:999px;background:rgba(0,0,0,0.6);color:#fff;display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 6px 18px rgba(0,0,0,0.12);z-index:20;border:none}
+    .scroller-btn.left{left:8px;top:50%;transform:translateY(-50%)}
+    .scroller-btn.right{right:8px;top:50%;transform:translateY(-50%)}
+    .scroller-btn:disabled, .scroller-btn[disabled]{opacity:.35;cursor:default;background:rgba(0,0,0,0.3)}
+    @media (max-width:900px){ .horizontal-scroller{height:220px} .space-card{min-width:200px;flex:0 0 200px} }
+    @media (max-width:520px){ .horizontal-scroller{height:200px} .space-card{min-width:180px;flex:0 0 180px} }
     .bento-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:18px}
     .bento-item{border-radius:16px;overflow:hidden}
     .reveal{transition:opacity .6s ease, transform .6s ease}
@@ -62,11 +94,14 @@ require_once __DIR__ . '/../../src/auth.php';
     .qty-btn{width:34px;height:34px;border-radius:8px;border:1px solid var(--sand);background:#fff;display:inline-flex;align-items:center;justify-content:center;cursor:pointer}
     .qty-display{min-width:36px;height:34px;display:flex;align-items:center;justify-content:center;background:#f3f2f0;border-radius:8px}
     .cart-desc{color:rgba(58,45,40,0.9);opacity:0.95;max-height:22px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;}
-    /* Increase default max-widths used across pages for a roomier layout */
-    .max-w-4xl{max-width:1100px !important}
-    .max-w-5xl{max-width:1400px !important}
-    .max-w-6xl{max-width:1700px !important}
-    .max-w-7xl{max-width:2000px !important}
+    /* Constrain overall site width for consistent layout */
+    .max-w-4xl{max-width:1000px !important}
+    .max-w-5xl{max-width:1100px !important}
+    .max-w-6xl{max-width:1200px !important}
+    .max-w-7xl{max-width:1200px !important}
+
+    /* Constrain generic card width to keep cards consistent */
+    .cl-card{max-width:420px}
     /* dark mode background */
     body{background:linear-gradient(180deg,var(--ivory), #f7f4f1)}
     [data-theme="dark"] body{background:linear-gradient(180deg,#0f0d0c,#12100f)}
@@ -77,12 +112,13 @@ require_once __DIR__ . '/../../src/auth.php';
   <div class="max-w-5xl mx-auto px-4 py-4 flex items-center justify-between">
     <div class="flex items-center gap-4">
       <div class="w-12 h-12 rounded-md overflow-hidden bg-white flex items-center justify-center">
-        <img src="logo.png" alt="Logo" style="width:48px;height:48px;object-fit:contain" />
+        <img src="images/logo.png" alt="Logo" style="width:48px;height:48px;object-fit:contain" />
       </div>
       <a href="index.php" class="text-2xl font-semibold" style="color:var(--espresso)">Cafe Lounge</a>
     </div>
 
     <nav class="hidden md:flex items-center gap-6">
+      <a class="nav-link transition-smooth" href="index.php">Home</a>
       <a class="nav-link transition-smooth" href="about.php">About Us</a>
       <a class="nav-link transition-smooth" href="booking_create.php">Book Space</a>
       <a class="nav-link transition-smooth" href="menu.php">Menu</a>
@@ -105,7 +141,7 @@ require_once __DIR__ . '/../../src/auth.php';
       }
       ?>
       <a href="cart.php" class="btn-icon cl-btn transition-smooth" style="text-decoration:none">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M6 6H21L20 12H8L6 6Z" stroke="white" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M9 2L6 6H2V8H4L6 20C6 21.1 6.9 22 8 22H16C17.1 22 18 21.1 18 20L20 8H22V6H18L15 2H9ZM9 4H15L17 8H7L9 4Z" fill="white"/><circle cx="9" cy="18" r="1.5" fill="white"/><circle cx="15" cy="18" r="1.5" fill="white"/></svg>
         <span>Cart</span>
         <span id="cartCountBadge" class="badge"><?= (int)$cartCount ?></span>
       </a>
@@ -121,6 +157,7 @@ require_once __DIR__ . '/../../src/auth.php';
           <div id="profileMenu" class="profile-menu absolute right-0 mt-2 hidden" aria-hidden="true">
             <a href="settings.php" class="block px-3 py-2 text-sm nav-link">Settings</a>
             <a href="bookings.php" class="block px-3 py-2 text-sm nav-link">Bookings</a>
+            <a href="receipt.php" class="block px-3 py-2 text-sm nav-link">Receipt</a>
             <a href="logout.php" class="block px-3 py-2 text-sm nav-link">Logout</a>
           </div>
         <?php endif; ?>

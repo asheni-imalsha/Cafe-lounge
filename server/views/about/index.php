@@ -25,9 +25,9 @@
     <p class="text-gray-800">To become the favorite café destination in Malabe for students, professionals, and coffee lovers seeking comfort, community, and creativity.</p>
   </div>
 
-  <div>
+  <div class="-mt-8">
     <div class="rounded-lg overflow-hidden shadow-md">
-      <img src="images/cafe.jpg" alt="Cafe Lounge interior" style="width:100%;height:520px;object-fit:cover" />
+      <img src="https://images.pexels.com/photos/2253643/pexels-photo-2253643.jpeg" alt="Cafe Lounge interior" style="width:100%;height:520px;object-fit:cover" />
     </div>
   </div>
 </section>

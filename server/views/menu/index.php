@@ -3,11 +3,11 @@
   <div class="flex items-center justify-between mb-6">
     <h1 class="text-2xl font-bold" style="color:var(--espresso)">Menu</h1>
   </div>
-  <div style="max-width:1200px;margin:0 auto;display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:28px;align-items:start;justify-items:stretch">
+  <div style="max-width:1200px;margin:0 auto;display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:28px;align-items:stretch;justify-items:stretch">
     <?php if (empty($items)): ?>
       <div class="p-6 bg-white rounded">No menu items found.</div>
     <?php else: foreach($items as $it): ?>
-      <div class="glass-card p-6 rounded-lg" style="min-height:180px;display:flex;flex-direction:column;justify-content:space-between;width:100%">
+      <div class="glass-card p-6 rounded-lg" style="height:420px;display:flex;flex-direction:column;justify-content:space-between;width:100%">
         <?php
           $image = isset($it['image']) ? trim($it['image']) : '';
           $imgSrc = '';
@@ -19,21 +19,21 @@
             }
           }
         ?>
-        <div style="height:120px;overflow:hidden;border-radius:12px;margin-bottom:12px;display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,0.6)">
+        <div style="height:160px;overflow:hidden;border-radius:12px;margin-bottom:16px;display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,0.6);flex-shrink:0">
           <?php if ($imgSrc): ?>
             <img src="<?= htmlspecialchars($imgSrc) ?>" alt="<?= htmlspecialchars($it['name']) ?>" style="width:100%;height:100%;object-fit:cover;display:block" />
           <?php else: ?>
             <div style="width:80%;height:80%;border-radius:8px;display:flex;align-items:center;justify-content:center;color:#9a8f85;background:linear-gradient(180deg, #fff, rgba(255,255,255,0.9));box-shadow:inset 0 6px 16px rgba(0,0,0,0.04)">No image</div>
           <?php endif; ?>
         </div>
-        <div>
-          <div class="font-semibold text-lg" style="color:var(--espresso)"><?= htmlspecialchars($it['name']) ?></div>
-          <div class="text-sm" style="color:var(--latte);font-weight:600">LKR <?= number_format($it['price'],0) ?></div>
+        <div style="flex:1;display:flex;flex-direction:column">
+          <div class="font-semibold text-lg" style="color:var(--espresso);margin-bottom:4px"><?= htmlspecialchars($it['name']) ?></div>
+          <div class="text-sm" style="color:var(--latte);font-weight:600;margin-bottom:8px">LKR <?= number_format($it['price'],0) ?></div>
           <?php if (!empty($it['description'])): ?>
-            <div class="text-sm text-gray-600 mt-2" style="line-height:1.25;opacity:0.9"><?= htmlspecialchars($it['description']) ?></div>
+            <div class="text-sm text-gray-600" style="line-height:1.4;opacity:0.85;overflow:hidden;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;flex:1"><?= htmlspecialchars($it['description']) ?></div>
           <?php endif; ?>
         </div>
-        <div class="mt-4" style="display:flex;justify-content:flex-start">
+        <div class="mt-4" style="display:flex;justify-content:flex-start;flex-shrink:0">
           <button data-id="<?= (int)$it['id'] ?>" class="add-to-cart cl-btn px-4 py-2 rounded">Add to cart</button>
         </div>
       </div>

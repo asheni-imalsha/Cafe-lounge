@@ -1,7 +1,7 @@
 <?php require_once __DIR__ . '/../partials/header.php'; ?>
 <div class="max-w-3xl mx-auto mt-12 grid grid-cols-1 md:grid-cols-2 gap-6 items-center">
   <div class="hidden md:block rounded-lg overflow-hidden shadow-lg">
-    <img src="../images/login-hero.jpg" alt="Welcome" style="width:100%;height:100%;object-fit:cover;min-height:320px" />
+    <img src="https://images.pexels.com/photos/15800347/pexels-photo-15800347.jpeg" alt="Welcome" style="width:100%;height:100%;object-fit:cover;min-height:400px" />
   </div>
 
   <div class="p-6 bg-white rounded-lg shadow">
