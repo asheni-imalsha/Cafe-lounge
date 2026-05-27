@@ -1,3 +1,4 @@
+DROP DATABASE IF EXISTS cafe_lounge;
 CREATE DATABASE IF NOT EXISTS cafe_lounge;
 USE cafe_lounge;
 
@@ -16,8 +17,10 @@ CREATE TABLE IF NOT EXISTS bookings (
   id INT AUTO_INCREMENT PRIMARY KEY,
   user_id INT NOT NULL,
   space_name VARCHAR(255) NOT NULL,
-  space_type VARCHAR(100) DEFAULT 'desk',
+  space_type ENUM('desk', 'Meeting Room', 'Study Desks', 'Rooftop Lounge', 'Outdoor Space', 'Group Space', 'Outdoor Swing') DEFAULT 'desk',
   booking_date DATETIME NOT NULL,
+  start_time TIME NOT NULL,
+  end_time TIME NOT NULL,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
@@ -42,7 +45,7 @@ CREATE TABLE IF NOT EXISTS cart (
   FOREIGN KEY (item_id) REFERENCES cafe_items(id) ON DELETE CASCADE
 );
 
--- Seed cafe items (at least 5)
+-- Add cafe items
 INSERT IGNORE INTO cafe_items (id, name, price, image) VALUES
 (1, 'Espresso', 2.50, NULL),
 (2, 'Latte', 3.50, NULL),
@@ -50,3 +53,6 @@ INSERT IGNORE INTO cafe_items (id, name, price, image) VALUES
 (4, 'Flat White', 3.75, NULL),
 (5, 'Croissant', 2.00, NULL),
 (6, 'Blueberry Muffin', 2.25, NULL);
+
+ALTER TABLE cafe_items
+ADD COLUMN description TEXT DEFAULT NULL AFTER price;

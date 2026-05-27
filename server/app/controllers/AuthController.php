@@ -18,7 +18,7 @@ class AuthController {
                 else {
                     $hash = password_hash($password, PASSWORD_DEFAULT);
                     $userModel->create($username, $name ?: null, $email, $hash);
-                    header('Location: /login.php'); exit;
+                    header('Location: login.php'); exit;
                 }
             }
         }
@@ -35,8 +35,19 @@ class AuthController {
             if (empty($errors)) {
                 $user = $userModel->findByUsernameOrEmail($identifier);
                 if ($user && password_verify($password, $user['password_hash'])) {
+                    // Successful login: migrate session cart to user cart in DB
                     loginUser($user['id'], $user['username']);
-                    header('Location: /index.php'); exit;
+                    if (session_status() !== PHP_SESSION_ACTIVE) session_start();
+                    // If guest session cart exists, persist to DB
+                    if (!empty($_SESSION['cart'])){
+                        require_once __DIR__ . '/../models/Cart.php';
+                        $cartModel = new Cart();
+                        foreach($_SESSION['cart'] as $itemId => $qty){
+                            $cartModel->add($user['id'], null, (int)$itemId, (int)$qty);
+                        }
+                        unset($_SESSION['cart']);
+                    }
+                    header('Location: index.php'); exit;
                 } else $errors[] = 'Invalid credentials.';
             }
         }

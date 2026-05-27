@@ -12,13 +12,27 @@ class Cart {
         return $stmt->execute([$id]);
     }
     public function itemsForUser($user_id){
-        $stmt = $this->pdo->prepare('SELECT c.id, i.name, i.price, c.quantity FROM cart c JOIN cafe_items i ON c.item_id = i.id WHERE c.user_id = ? ORDER BY c.added_at');
+        $stmt = $this->pdo->prepare('SELECT c.id AS cart_id, i.id AS item_id, i.name, i.price, i.image, i.description, c.quantity FROM cart c JOIN cafe_items i ON c.item_id = i.id WHERE c.user_id = ? ORDER BY c.added_at');
         $stmt->execute([$user_id]);
         return $stmt->fetchAll();
     }
     public function itemsForSession($session_id){
-        $stmt = $this->pdo->prepare('SELECT c.id, i.name, i.price, c.quantity FROM cart c JOIN cafe_items i ON c.item_id = i.id WHERE c.session_id = ? ORDER BY c.added_at');
+        $stmt = $this->pdo->prepare('SELECT c.id AS cart_id, i.id AS item_id, i.name, i.price, i.image, i.description, c.quantity FROM cart c JOIN cafe_items i ON c.item_id = i.id WHERE c.session_id = ? ORDER BY c.added_at');
         $stmt->execute([$session_id]);
         return $stmt->fetchAll();
+    }
+    public function update($cartId, $quantity){
+        $stmt = $this->pdo->prepare('UPDATE cart SET quantity = ? WHERE id = ?');
+        return $stmt->execute([(int)$quantity, (int)$cartId]);
+    }
+    public function totalForUser($user_id){
+        $items = $this->itemsForUser($user_id);
+        $t = 0; foreach($items as $it) $t += $it['price'] * $it['quantity'];
+        return $t;
+    }
+    public function totalForSession($session_id){
+        $items = $this->itemsForSession($session_id);
+        $t = 0; foreach($items as $it) $t += $it['price'] * $it['quantity'];
+        return $t;
     }
 }
