@@ -7,6 +7,7 @@
   <?php if (!empty($errors)): ?><div class="mb-4 text-red-600"><?php foreach($errors as $e) echo '<div>'.htmlspecialchars($e).'</div>'; ?></div><?php endif; ?>
 
   <form method="post" action="" class="space-y-4 bg-white p-6 rounded-lg shadow-sm">
+    <?php echo csrfInputField(); ?>
     <label class="block">Space name
       <input name="space_name" required class="w-full border p-3 rounded" value="<?= htmlspecialchars($booking['space_name']) ?>">
     </label>

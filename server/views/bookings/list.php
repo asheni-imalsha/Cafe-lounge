@@ -49,10 +49,14 @@ require_once __DIR__ . '/../partials/header.php';
             <td class="px-4 py-3\"><?= htmlspecialchars(ucwords(strtolower($b['space_type_name'] ?? $b['space_type']))) ?></td>
             <td class="px-4 py-3\"><?= htmlspecialchars($b['booking_date']) ?> <div class="text-xs text-gray-600"><?= htmlspecialchars(($b['start_time'] ?? '') . ' - ' . ($b['end_time'] ?? '')) ?></div></td>
             <td class="px-4 py-3">
-              <?php if (isset($_SESSION['user_id']) && $_SESSION['user_id'] == $b['user_id']): ?>
-                <a href="booking_edit.php?id=<?= (int)$b['id'] ?>" class="px-3 py-1 border rounded-full text-sm nav-link">Edit</a>
-                <a href="booking_delete.php?id=<?= (int)$b['id'] ?>" class="px-3 py-1 rounded-full text-sm confirm-delete" style="background:#f8d7da;color:#842029">Delete</a>
-              <?php endif; ?>
+                <?php if (isset($_SESSION['user_id']) && $_SESSION['user_id'] == $b['user_id']): ?>
+                  <a href="booking_edit.php?id=<?= (int)$b['id'] ?>" class="edit-booking px-3 py-1.5 rounded-lg text-sm transition-colors" style="border:1px solid var(--sand);color:var(--espresso);background:white;text-decoration:none">Edit</a>
+                  <form method="post" action="booking_delete.php" onsubmit="return confirm('Are you sure you want to delete this booking?');" style="display:inline;margin:0">
+                    <?php echo csrfInputField(); ?>
+                    <input type="hidden" name="id" value="<?= (int)$b['id'] ?>">
+                    <button type="submit" class="px-3 py-1.5 rounded-lg text-sm transition-colors" style="background:#f8d7da;color:#842029;border:none;cursor:pointer">Delete</button>
+                  </form>
+                <?php endif; ?>
             </td>
           </tr>
         <?php endforeach; ?>
@@ -69,6 +73,7 @@ require_once __DIR__ . '/../partials/header.php';
       <button id="closeEditModal" class="text-gray-500">✕</button>
     </div>
     <form id="editForm" method="post" action="" class="space-y-3">
+      <?php echo csrfInputField(); ?>
       <input type="hidden" name="id" id="edit_id">
       <label class="block text-sm">Space name
         <select id="edit_space_name" name="space_name" required class="w-full border p-3 rounded">
@@ -131,9 +136,16 @@ require_once __DIR__ . '/../partials/header.php';
         const whenTd = document.createElement('td'); whenTd.className='px-4 py-3'; whenTd.innerHTML = (b.booking_date || '')+ ' <div class="text-xs text-gray-600">' + ((b.start_time||'') + ' - ' + (b.end_time||'')) + '</div>';
         const actionsTd = document.createElement('td'); actionsTd.className='px-4 py-3';
         if (b.is_owner){
-          const editA = document.createElement('a'); editA.href = 'booking_edit.php?id='+encodeURIComponent(b.id); editA.className='px-3 py-1 border rounded-full text-sm nav-link'; editA.textContent='Edit';
-          const delA = document.createElement('a'); delA.href = 'booking_delete.php?id='+encodeURIComponent(b.id); delA.className='px-3 py-1 rounded-full text-sm confirm-delete'; delA.style.background='#f8d7da'; delA.style.color='#842029'; delA.textContent='Delete';
-          actionsTd.appendChild(editA); actionsTd.appendChild(document.createTextNode(' ')); actionsTd.appendChild(delA);
+          const editA = document.createElement('a'); editA.href = 'booking_edit.php?id='+encodeURIComponent(b.id); editA.className='edit-booking px-3 py-1.5 rounded-lg text-sm transition-colors'; editA.style.border='1px solid var(--sand)'; editA.style.color='var(--espresso)'; editA.style.background='white'; editA.style.textDecoration='none'; editA.textContent='Edit';
+          // create POST delete form with CSRF token from meta
+          const delForm = document.createElement('form'); delForm.method='post'; delForm.action='booking_delete.php'; delForm.style.display='inline'; delForm.style.margin='0';
+          const meta = document.querySelector('meta[name="csrf-token"]');
+          const csrfInput = document.createElement('input'); csrfInput.type='hidden'; csrfInput.name='csrf_token'; csrfInput.value = meta ? meta.getAttribute('content') : '';
+          const idInput = document.createElement('input'); idInput.type='hidden'; idInput.name='id'; idInput.value = b.id;
+          const delBtn = document.createElement('button'); delBtn.type='submit'; delBtn.className='px-3 py-1.5 rounded-lg text-sm transition-colors'; delBtn.style.background='#f8d7da'; delBtn.style.color='#842029'; delBtn.style.border='none'; delBtn.style.cursor='pointer'; delBtn.textContent='Delete';
+          delBtn.addEventListener('click', function(e){ if (!confirm('Are you sure you want to delete this booking?')) e.preventDefault(); });
+          delForm.appendChild(csrfInput); delForm.appendChild(idInput); delForm.appendChild(delBtn);
+          actionsTd.appendChild(editA); actionsTd.appendChild(document.createTextNode(' ')); actionsTd.appendChild(delForm);
         }
         tr.appendChild(userTd); tr.appendChild(spaceTd); tr.appendChild(typeTd); tr.appendChild(whenTd); tr.appendChild(actionsTd);
         tbody.appendChild(tr);

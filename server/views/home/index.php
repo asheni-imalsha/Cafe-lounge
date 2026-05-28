@@ -164,17 +164,17 @@ try {
 <section class="mt-16 mb-12 px-4 md:px-0">
   <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
     <a href="booking_create.php" class="group p-6 rounded-xl bg-gradient-to-br from-white to-amber-50 shadow-md hover:shadow-lg transition-all duration-300 hover:-translate-y-1 border border-amber-100 reveal">
-      <div class="w-12 h-12 rounded-lg bg-amber-100 flex items-center justify-center mb-4 group-hover:bg-amber-600 transition-colors text-amber-600 group-hover:text-white font-bold text-xl">B</div>
+      <div class="w-12 h-12 rounded-lg bg-amber-100 flex items-center justify-center mb-4 group-hover:bg-amber-600 transition-colors text-amber-600 group-hover:text-white font-bold text-xl"></div>
       <h3 class="text-xl font-bold text-gray-800 mb-2">Book a Space</h3>
       <p class="text-gray-600">Reserve your perfect spot for work or study</p>
     </a>
     <a href="menu.php" class="group p-6 rounded-xl bg-gradient-to-br from-white to-amber-50 shadow-md hover:shadow-lg transition-all duration-300 hover:-translate-y-1 border border-amber-100 reveal">
-      <div class="w-12 h-12 rounded-lg bg-amber-100 flex items-center justify-center mb-4 group-hover:bg-amber-600 transition-colors text-amber-600 group-hover:text-white font-bold text-xl">M</div>
+      <div class="w-12 h-12 rounded-lg bg-amber-100 flex items-center justify-center mb-4 group-hover:bg-amber-600 transition-colors text-amber-600 group-hover:text-white font-bold text-xl"></div>
       <h3 class="text-xl font-bold text-gray-800 mb-2">Browse Menu</h3>
       <p class="text-gray-600">Explore our delicious food and drinks</p>
     </a>
     <a href="bookings.php" class="group p-6 rounded-xl bg-gradient-to-br from-white to-amber-50 shadow-md hover:shadow-lg transition-all duration-300 hover:-translate-y-1 border border-amber-100 reveal">
-      <div class="w-12 h-12 rounded-lg bg-amber-100 flex items-center justify-center mb-4 group-hover:bg-amber-600 transition-colors text-amber-600 group-hover:text-white font-bold text-xl">M</div>
+      <div class="w-12 h-12 rounded-lg bg-amber-100 flex items-center justify-center mb-4 group-hover:bg-amber-600 transition-colors text-amber-600 group-hover:text-white font-bold text-xl"></div>
       <h3 class="text-xl font-bold text-gray-800 mb-2">Manage Bookings</h3>
       <p class="text-gray-600">View, edit, or cancel your reservations</p>
     </a>

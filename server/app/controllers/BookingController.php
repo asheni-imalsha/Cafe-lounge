@@ -21,6 +21,7 @@ class BookingController {
         $errors = [];
         $model = new Booking();
         if ($_SERVER['REQUEST_METHOD'] === 'POST'){
+            if (!validateCsrfToken($_POST['csrf_token'] ?? '')){ $errors[] = 'Invalid CSRF token.'; }
             $space_name = trim($_POST['space_name'] ?? '');
             $space_type = $_POST['space_type'] ?? 'desk';
             $booking_date = $_POST['booking_date'] ?? '';
@@ -71,6 +72,7 @@ class BookingController {
             }
         } catch(Exception $e){ /* ignore */ }
         if ($_SERVER['REQUEST_METHOD'] === 'POST'){
+            if (!validateCsrfToken($_POST['csrf_token'] ?? '')){ $errors[] = 'Invalid CSRF token.'; }
             $space_name = trim($_POST['space_name'] ?? '');
             if ($space_name === 'Other' && !empty($_POST['space_name_other'])) $space_name = trim($_POST['space_name_other']);
             $space_type = $_POST['space_type'] ?? ($_POST['space_type_hidden'] ?? 'desk');
@@ -104,7 +106,18 @@ class BookingController {
     public static function delete(){
         requireLogin();
         $model = new Booking();
-        $id = $_GET['id'] ?? null;
+        // prefer POST with CSRF, but accept GET as fallback
+        $id = null;
+        if ($_SERVER['REQUEST_METHOD'] === 'POST'){
+            if (!validateCsrfToken($_POST['csrf_token'] ?? '')){
+                if (session_status() !== PHP_SESSION_ACTIVE) session_start();
+                $_SESSION['flash'] = ['type'=>'error','msg'=>'Invalid CSRF token.'];
+                header('Location: bookings.php'); exit;
+            }
+            $id = $_POST['id'] ?? null;
+        } else {
+            $id = $_GET['id'] ?? null;
+        }
         if ($id){
             $b = $model->find($id);
             if ($b && $b['user_id'] == getCurrentUserId()) $model->delete($id);

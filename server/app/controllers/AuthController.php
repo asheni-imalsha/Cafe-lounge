@@ -7,6 +7,7 @@ class AuthController {
         $userModel = new User();
         $errors = [];
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            if (!validateCsrfToken($_POST['csrf_token'] ?? '')) { $errors[] = 'Invalid CSRF token.'; }
             $username = trim($_POST['username'] ?? '');
             $name = trim($_POST['name'] ?? '');
             $email = trim($_POST['email'] ?? '');
@@ -17,8 +18,23 @@ class AuthController {
                 if ($exists) $errors[] = 'Username or email already taken.';
                 else {
                     $hash = password_hash($password, PASSWORD_DEFAULT);
-                    $userModel->create($username, $name ?: null, $email, $hash);
-                    header('Location: login.php'); exit;
+                        $userModel->create($username, $name ?: null, $email, $hash);
+                        // Auto-login newly registered user and migrate any guest session cart
+                        if (session_status() !== PHP_SESSION_ACTIVE) session_start();
+                        $userRow = $userModel->findByUsernameOrEmail($username);
+                        if ($userRow){
+                            loginUser($userRow['id'], $userRow['username']);
+                            // migrate session cart to DB
+                            if (!empty($_SESSION['cart'])){
+                                require_once __DIR__ . '/../models/Cart.php';
+                                $cartModel = new Cart();
+                                foreach($_SESSION['cart'] as $itemId => $qty){
+                                    $cartModel->add($userRow['id'], null, (int)$itemId, (int)$qty);
+                                }
+                                unset($_SESSION['cart']);
+                            }
+                        }
+                        header('Location: index.php'); exit;
                 }
             }
         }
@@ -29,6 +45,7 @@ class AuthController {
         $userModel = new User();
         $errors = [];
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            if (!validateCsrfToken($_POST['csrf_token'] ?? '')) { $errors[] = 'Invalid CSRF token.'; }
             $identifier = trim($_POST['username'] ?? '');
             $password = $_POST['password'] ?? '';
             if ($identifier === '' || $password === '') $errors[] = 'Username/email and password are required.';

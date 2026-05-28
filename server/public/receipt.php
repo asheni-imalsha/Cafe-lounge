@@ -146,6 +146,7 @@ require_once __DIR__ . '/../views/partials/header.php';
           <a href="<?= htmlspecialchars($url) ?>" class="btn-pdf" target="_blank">Download PDF</a>
         <?php else: ?>
           <form method="POST" action="receipt_download.php" style="display:inline">
+            <?php echo csrfInputField(); ?>
             <button type="submit" class="btn-pdf">Download PDF</button>
           </form>
         <?php endif; ?>

@@ -1,11 +1,17 @@
-<?php if (session_status() !== PHP_SESSION_ACTIVE) session_start();
+<?php
 require_once __DIR__ . '/../../src/auth.php';
+// ensure session and CSRF token available
+ensureSession();
+?>
 ?>
 <!doctype html>
 <html lang="en">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
+  <?php // expose CSRF token for AJAX
+    echo '<meta name="csrf-token" content="' . htmlspecialchars(generateCsrfToken()) . '">';
+  ?>
   <title>Cafe Lounge</title>
   <link rel="icon" type="image/png" href="images/logo.png">
   <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
@@ -50,7 +56,10 @@ require_once __DIR__ . '/../../src/auth.php';
     .big-hero::after{content:'';position:absolute;inset:0;background:linear-gradient(rgba(255,255,255,0.6),rgba(255,255,255,0.12));pointer-events:none}
 
     /* sticky header */
-    header{position:sticky;top:0;z-index:60;background:var(--ivory);backdrop-filter:blur(4px)}
+    header{position:sticky;top:0;z-index:60;background:var(--ivory);backdrop-filter:blur(4px);height:var(--header-height,auto);overflow:visible;transition:transform .28s ease,height .28s ease,opacity .22s ease;will-change:transform,height}
+
+    /* slide header away when a form or modal is active */
+    body.form-active header{transform:translateY(-100%);height:0;opacity:0;pointer-events:none}
 
     /* hero left-side white card (overlays left of hero image) */
     /* place a card covering ~1/3 of the hero image, top-left overlay */
@@ -108,6 +117,33 @@ require_once __DIR__ . '/../../src/auth.php';
   </style>
 </head>
 <body class="cl-header font-sans">
+<script>
+(function(){
+  function getHeader(){ return document.querySelector('header'); }
+  function updateHeaderVar(){ try{ const headerEl = getHeader(); if (headerEl) document.documentElement.style.setProperty('--header-height', headerEl.offsetHeight + 'px'); }catch(e){} }
+  function isModalForm(el){
+    try{
+      if (!el || !el.closest) return false;
+      const form = el.closest('form');
+      if (!form) return false;
+      // consider it a modal form when form is inside an overlay/modal container
+      const modalAncestor = form.closest('.modal, [role="dialog"], [data-modal], [id$="Modal"], .fixed');
+      if (modalAncestor) return true;
+      // fallback: if form itself has class 'modal' or 'dialog'
+      if (form.classList.contains('modal') || form.getAttribute('role') === 'dialog') return true;
+      return false;
+    }catch(e){return false}
+  }
+
+  // set initial header height CSS variable
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', updateHeaderVar); else updateHeaderVar();
+  window.addEventListener('resize', updateHeaderVar);
+
+  document.addEventListener('focusin', function(e){ if (isModalForm(e.target)) { updateHeaderVar(); document.body.classList.add('form-active'); } });
+  document.addEventListener('focusout', function(){ setTimeout(function(){ if (!isModalForm(document.activeElement)) document.body.classList.remove('form-active'); }, 0); });
+  document.addEventListener('click', function(e){ if (isModalForm(e.target)) { updateHeaderVar(); document.body.classList.add('form-active'); } else { setTimeout(function(){ if (!isModalForm(document.activeElement)) document.body.classList.remove('form-active'); }, 0); } });
+})();
+</script>
 <header class="shadow-sm">
   <div class="max-w-5xl mx-auto px-4 py-4 flex items-center justify-between">
     <div class="flex items-center gap-4">

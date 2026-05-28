@@ -15,6 +15,11 @@ $bookingModel = new Booking();
 $bookings = $bookingModel->allForUser($user);
 $selected = [];
 if ($_SERVER['REQUEST_METHOD'] === 'POST'){
+  // CSRF validation
+  if (!validateCsrfToken($_POST['csrf_token'] ?? '')){
+    $_SESSION['flash'] = ['type'=>'error','msg'=>'Invalid CSRF token.'];
+    header('Location: cart.php'); exit;
+  }
     if (isset($_POST['selected'])){
         $selectedRaw = $_POST['selected'];
         if (!is_array($selectedRaw)) $selectedRaw = [$selectedRaw];
@@ -130,6 +135,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST'){
       </ul>
       <h3>Select Booking</h3>
       <form method="POST" id="confirmForm">
+        <?php echo csrfInputField(); ?>
         <?php if (isset($_POST['selected'])): foreach($_POST['selected'] as $s): ?>
           <input type="hidden" name="selected[]" value="<?= htmlspecialchars($s) ?>" />
         <?php endforeach; elseif (isset($_POST['selected_all'])): 

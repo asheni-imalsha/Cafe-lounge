@@ -1,6 +1,13 @@
 <?php
 require_once __DIR__ . '/../src/auth.php';
+$token = null;
 if (session_status() !== PHP_SESSION_ACTIVE) session_start();
+if ($_SERVER['REQUEST_METHOD'] === 'POST'){
+    $token = $_POST['csrf_token'] ?? '';
+    if (!validateCsrfToken($token)){
+        http_response_code(400); echo 'Invalid CSRF token'; exit;
+    }
+}
 $order = $_SESSION['last_order'] ?? null;
 $html = $_SESSION['last_order_html'] ?? null;
 // Composer autoload for dompdf

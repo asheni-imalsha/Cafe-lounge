@@ -121,6 +121,7 @@ if (empty($spaceTypes)) {
         <button id="closeModal" class="text-gray-500">✕</button>
       </div>
       <form method="post" action="" class="space-y-3">
+        <?php echo csrfInputField(); ?>
         <label class="block text-sm">Space name
           <select id="space_name_input" name="space_name" required class="w-full border p-3 rounded">
             <?php foreach($spaceTypes as $s): for($i=1;$i<=3;$i++): $n = $s . ' ' . $i; ?>
@@ -170,6 +171,7 @@ if (empty($spaceTypes)) {
         <button id="closeEditModal" class="text-gray-500">✕</button>
       </div>
       <form id="editBookingForm" method="post" action="" class="space-y-3">
+        <?php echo csrfInputField(); ?>
         <label class="block text-sm">Space name
           <input id="edit_space_name" name="space_name" required class="w-full border p-3 rounded">
         </label>

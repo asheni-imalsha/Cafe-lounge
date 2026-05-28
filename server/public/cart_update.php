@@ -6,6 +6,8 @@ header('Content-Type: application/json');
 if (session_status() !== PHP_SESSION_ACTIVE) session_start();
 $id = isset($_POST['id']) ? $_POST['id'] : null;
 $qty = isset($_POST['quantity']) ? (int)$_POST['quantity'] : null;
+// CSRF validation
+if (!validateCsrfToken($_POST['csrf_token'] ?? '')){ echo json_encode(['error'=>'invalid_csrf']); exit; }
 if ($id === null || $qty === null) { echo json_encode(['error'=>'missing parameters']); exit; }
 $cart = new Cart();
 $user = getCurrentUserId();

@@ -11,6 +11,7 @@
     <?php endif; ?>
 
     <form method="post" action="" class="space-y-4">
+      <?php echo csrfInputField(); ?>
       <div>
         <label class="block text-sm mb-1">Username</label>
         <input name="username" required class="w-full border p-3 rounded" placeholder="Asheni" value="<?= htmlspecialchars($_POST['username'] ?? '') ?>">

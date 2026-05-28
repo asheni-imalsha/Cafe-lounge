@@ -6,6 +6,8 @@ header('Content-Type: application/json');
 if (session_status() !== PHP_SESSION_ACTIVE) session_start();
 $item_id = $_POST['item_id'] ?? null;
 $qty = isset($_POST['quantity']) ? (int)$_POST['quantity'] : 1;
+// CSRF validation
+if (!validateCsrfToken($_POST['csrf_token'] ?? '')){ echo json_encode(['error'=>'invalid_csrf']); exit; }
 if (!$item_id) { echo json_encode(['error'=>'missing item']); exit; }
 $ci = new CafeItem();
 $it = $ci->find($item_id);

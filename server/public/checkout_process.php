@@ -17,6 +17,12 @@ if (!$user) {
     echo json_encode(['error' => 'unauthenticated']);
     exit;
 }
+$token = $_POST['csrf_token'] ?? '';
+if (!validateCsrfToken($token)){
+    http_response_code(400);
+    echo json_encode(['error'=>'invalid_csrf']);
+    exit;
+}
 
 $selected = $_POST['selected'] ?? [];
 $booking_id = isset($_POST['booking_id']) ? (int)$_POST['booking_id'] : null;
