@@ -3,7 +3,6 @@ require_once __DIR__ . '/../../src/auth.php';
 // ensure session and CSRF token available
 ensureSession();
 ?>
-?>
 <!doctype html>
 <html lang="en">
 <head>
