@@ -173,7 +173,13 @@ if (empty($spaceTypes)) {
       <form id="editBookingForm" method="post" action="" class="space-y-3">
         <?php echo csrfInputField(); ?>
         <label class="block text-sm">Space name
-          <input id="edit_space_name" name="space_name" required class="w-full border p-3 rounded">
+          <select id="edit_space_name_select" name="space_name" required class="w-full border p-3 rounded">
+            <?php foreach($spaceTypes as $s): for($i=1;$i<=3;$i++): $n = $s . ' ' . $i; ?>
+              <option value="<?= htmlspecialchars($n) ?>"><?= htmlspecialchars($n) ?></option>
+            <?php endfor; endforeach; ?>
+            <option value="Other">Other (specify...)</option>
+          </select>
+          <input id="edit_space_name_other" name="space_name_other" class="w-full border p-3 rounded mt-2 hidden" placeholder="Specify space name">
         </label>
         <label class="block text-sm">Space type
           <input id="edit_space_type" name="space_type" class="w-full border p-3 rounded">
@@ -363,7 +369,14 @@ if (empty($spaceTypes)) {
   const cancelEditBtn = document.getElementById('cancelEdit');
   
   function showEditModal(bookingId, spaceName, spaceType, bookingDate, startTime, endTime) {
-    document.getElementById('edit_space_name').value = spaceName;
+    // set space name: pick existing option or fall back to Other
+    const editSelect = document.getElementById('edit_space_name_select');
+    const editOther = document.getElementById('edit_space_name_other');
+    if (editSelect){
+      const opts = Array.from(editSelect.options).map(o=>o.value);
+      if (opts.includes(spaceName)) { editSelect.value = spaceName; editOther.classList.add('hidden'); editOther.required = false; }
+      else { editSelect.value = 'Other'; editOther.classList.remove('hidden'); editOther.required = true; editOther.value = spaceName; }
+    }
     document.getElementById('edit_space_type').value = spaceType;
     document.getElementById('edit_booking_date').value = bookingDate;
     document.getElementById('edit_start_time').value = startTime;
@@ -393,6 +406,28 @@ if (empty($spaceTypes)) {
       const startTime = this.dataset.start;
       const endTime = this.dataset.end;
       showEditModal(bookingId, spaceName, spaceType, bookingDate, startTime, endTime);
+    });
+
+    // edit modal: toggle Other input and update edit_space_type when selection changes
+    document.getElementById('edit_space_name_select')?.addEventListener('change', function(){
+      const editOther = document.getElementById('edit_space_name_other');
+      const editTypeInput = document.getElementById('edit_space_type');
+      if (this.value === 'Other'){
+        if (editOther) { editOther.classList.remove('hidden'); editOther.required = true; editOther.focus(); }
+        // allow choosing type manually by showing main select if available
+        const mainTypeSelect = document.getElementById('space_type_select'); if (mainTypeSelect) mainTypeSelect.classList.remove('hidden');
+        const typeDisplay = document.getElementById('space_type_display'); if (typeDisplay) typeDisplay.classList.add('hidden');
+      } else {
+        if (editOther) { editOther.classList.add('hidden'); editOther.required = false; }
+        const mainTypeSelect = document.getElementById('space_type_select'); if (mainTypeSelect) mainTypeSelect.classList.add('hidden');
+        const typeDisplay = document.getElementById('space_type_display'); if (typeDisplay) typeDisplay.classList.remove('hidden');
+        // derive type from selected name
+        const typeName = this.value.replace(/\s+\d+$/,'');
+        let matched = null;
+        Array.from(document.querySelectorAll('#space_type_select option')).forEach(opt=>{ if (opt.textContent.toLowerCase() === typeName.toLowerCase()) matched = opt.value; });
+        if (!matched) matched = typeName.toLowerCase();
+        if (editTypeInput) editTypeInput.value = matched;
+      }
     });
   });
 </script>

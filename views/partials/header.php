@@ -5,6 +5,36 @@
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>Cafe Lounge</title>
   <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+  <script>
+  (function(){
+    if (!/localhost|127\.0\.0\.1/.test(location.hostname)) return;
+    const candidates = [
+      (location.pathname.replace(/\/[^\/]*$/, '') || '/') + '/livereload.php',
+      '/server/public/livereload.php',
+      '/livereload.php',
+      '/Cafe-lounge/server/public/livereload.php',
+      '/Cafe-lounge/livereload.php'
+    ];
+    let endpoint = null; let last = 0;
+    async function probe(){
+      for (const c of candidates){
+        try{ const r = await fetch(c + '?_=' + Date.now(), {cache:'no-store'}); if (r.ok){ endpoint = c; return; } }catch(e){}
+      }
+    }
+    async function check(){
+      try{
+        if (!endpoint) { await probe(); if (!endpoint) return; }
+        const r = await fetch(endpoint + '?_=' + Date.now(), {cache:'no-store'});
+        if (!r.ok) return;
+        const j = await r.json(); const m = j.mtime || 0;
+        if (last && m > last){ console.log('LiveReload: change detected, reloading'); location.reload(true); }
+        last = m;
+      }catch(e){}
+    }
+    setInterval(check, 1500);
+    if (document.readyState === 'complete') check(); else window.addEventListener('load', check);
+  })();
+  </script>
 </head>
 <body class="bg-gray-100 text-gray-900">
 <header class="bg-white p-4 shadow">

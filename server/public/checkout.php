@@ -44,7 +44,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST'){
     if (isset($_POST['action']) && $_POST['action']==='confirm'){
         $booking_id = isset($_POST['booking_id']) ? (int)$_POST['booking_id'] : null;
         $booking = $bookingModel->find($booking_id);
-        // In a real app we'd persist an order. Here we will prepare a receipt and remove cart rows.
         $order = [
             'user_id'=>$user,
             'booking'=>$booking,

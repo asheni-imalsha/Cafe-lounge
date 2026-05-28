@@ -51,10 +51,10 @@ require_once __DIR__ . '/../partials/header.php';
             <td class="px-4 py-3">
                 <?php if (isset($_SESSION['user_id']) && $_SESSION['user_id'] == $b['user_id']): ?>
                   <a href="booking_edit.php?id=<?= (int)$b['id'] ?>" class="edit-booking px-3 py-1.5 rounded-lg text-sm transition-colors" style="border:1px solid var(--sand);color:var(--espresso);background:white;text-decoration:none">Edit</a>
-                  <form method="post" action="booking_delete.php" onsubmit="return confirm('Are you sure you want to delete this booking?');" style="display:inline;margin:0">
+                  <form method="post" action="booking_delete.php" style="display:inline;margin:0">
                     <?php echo csrfInputField(); ?>
                     <input type="hidden" name="id" value="<?= (int)$b['id'] ?>">
-                    <button type="submit" class="px-3 py-1.5 rounded-lg text-sm transition-colors" style="background:#f8d7da;color:#842029;border:none;cursor:pointer">Delete</button>
+                    <button type="button" class="px-3 py-1.5 rounded-lg text-sm transition-colors booking-delete-btn" style="background:#f8d7da;color:#842029;border:none;cursor:pointer">Delete</button>
                   </form>
                 <?php endif; ?>
             </td>
@@ -113,10 +113,7 @@ require_once __DIR__ . '/../partials/header.php';
 </div>
 
 <script>
-  // delete confirm
-  document.querySelectorAll('.confirm-delete').forEach(a=>{
-    a.addEventListener('click', function(e){ if (!confirm('Are you sure you want to delete this booking?')) e.preventDefault(); });
-  });
+  // delete confirm - replaced by custom modal handlers below
 
   // auto-submit filter form
   document.getElementById('filterForm')?.addEventListener('change', function(e){ e.preventDefault(); const f = new FormData(this); const v = f.get('filter') || 'all'; fetchAndRender(v); });
@@ -142,8 +139,8 @@ require_once __DIR__ . '/../partials/header.php';
           const meta = document.querySelector('meta[name="csrf-token"]');
           const csrfInput = document.createElement('input'); csrfInput.type='hidden'; csrfInput.name='csrf_token'; csrfInput.value = meta ? meta.getAttribute('content') : '';
           const idInput = document.createElement('input'); idInput.type='hidden'; idInput.name='id'; idInput.value = b.id;
-          const delBtn = document.createElement('button'); delBtn.type='submit'; delBtn.className='px-3 py-1.5 rounded-lg text-sm transition-colors'; delBtn.style.background='#f8d7da'; delBtn.style.color='#842029'; delBtn.style.border='none'; delBtn.style.cursor='pointer'; delBtn.textContent='Delete';
-          delBtn.addEventListener('click', function(e){ if (!confirm('Are you sure you want to delete this booking?')) e.preventDefault(); });
+          const delBtn = document.createElement('button'); delBtn.type='button'; delBtn.className='px-3 py-1.5 rounded-lg text-sm transition-colors booking-delete-btn'; delBtn.style.background='#f8d7da'; delBtn.style.color='#842029'; delBtn.style.border='none'; delBtn.style.cursor='pointer'; delBtn.textContent='Delete';
+          delBtn.addEventListener('click', function(e){ e.preventDefault(); const f = this.closest('form'); if (f && window.showBookingDeleteModalForForm) window.showBookingDeleteModalForForm(f); });
           delForm.appendChild(csrfInput); delForm.appendChild(idInput); delForm.appendChild(delBtn);
           actionsTd.appendChild(editA); actionsTd.appendChild(document.createTextNode(' ')); actionsTd.appendChild(delForm);
         }
@@ -152,8 +149,7 @@ require_once __DIR__ . '/../partials/header.php';
       });
       // update title
       document.querySelector('h1').textContent = (filter==='my') ? 'My Bookings' : 'All Bookings';
-      // reattach handlers
-      document.querySelectorAll('.confirm-delete').forEach(a=>{ a.addEventListener('click', function(e){ if (!confirm('Are you sure you want to delete this booking?')) e.preventDefault(); }); });
+      // reattach handlers (edit modal interception retained below)
       // reattach edit modal interception
       document.querySelectorAll('a[href^="booking_edit.php?id="]').forEach(a=>{
         a.addEventListener('click', async function(e){
@@ -268,5 +264,41 @@ require_once __DIR__ . '/../partials/header.php';
   document.getElementById('edit_start_time')?.addEventListener('change', checkEditAvailability);
   document.getElementById('edit_end_time')?.addEventListener('change', checkEditAvailability);
 
+</script>
+<!-- Delete Confirmation Modal -->
+<div id="deleteModal" class="fixed inset-0 bg-black bg-opacity-40 hidden flex items-center justify-center z-50 p-6">
+  <div class="glass-card rounded-3xl p-6 w-full max-w-sm shadow-lg">
+    <div class="flex items-center justify-between mb-4">
+      <h3 class="text-lg font-semibold">Delete Booking</h3>
+      <button id="closeDeleteModal" class="text-gray-500">✕</button>
+    </div>
+    <p class="mb-6 text-gray-700">Are you sure you want to delete this booking? This action cannot be undone.</p>
+    <div class="flex items-center gap-3">
+      <button id="confirmDeleteBtn" class="px-4 py-2 rounded" style="background:#f8d7da;color:#842029;font-weight:500">Delete</button>
+      <button id="cancelDeleteBtn" class="px-4 py-2 border rounded">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  // Delete modal logic for bookings list
+  (function(){
+    const deleteModal = document.getElementById('deleteModal');
+    const closeDeleteBtn = document.getElementById('closeDeleteModal');
+    const confirmDeleteBtn = document.getElementById('confirmDeleteBtn');
+    const cancelDeleteBtn = document.getElementById('cancelDeleteBtn');
+    let pendingForm = null;
+    function showDeleteModalForForm(form){ pendingForm = form; deleteModal.classList.remove('hidden'); }
+    function hideDeleteModal(){ pendingForm = null; deleteModal.classList.add('hidden'); }
+    // expose helper so dynamically-created buttons can open the modal
+    window.showBookingDeleteModalForForm = showDeleteModalForForm;
+    window.hideBookingDeleteModal = hideDeleteModal;
+    // attach to existing delete buttons
+    document.querySelectorAll('.booking-delete-btn').forEach(btn=>{ btn.addEventListener('click', function(e){ e.preventDefault(); const f = this.closest('form'); if (f) showDeleteModalForForm(f); }); });
+    if (closeDeleteBtn) closeDeleteBtn.addEventListener('click', hideDeleteModal);
+    if (cancelDeleteBtn) cancelDeleteBtn.addEventListener('click', hideDeleteModal);
+    if (deleteModal) deleteModal.addEventListener('click', (e)=>{ if (e.target === deleteModal) hideDeleteModal(); });
+    if (confirmDeleteBtn) confirmDeleteBtn.addEventListener('click', function(){ if (pendingForm) pendingForm.submit(); hideDeleteModal(); });
+  })();
 </script>
 <?php require_once __DIR__ . '/../partials/footer.php'; ?>

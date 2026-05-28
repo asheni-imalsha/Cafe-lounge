@@ -114,6 +114,36 @@ ensureSession();
     body{background:linear-gradient(180deg,var(--ivory), #f7f4f1)}
     [data-theme="dark"] body{background:linear-gradient(180deg,#0f0d0c,#12100f)}
   </style>
+  <script>
+  (function(){
+    if (!/localhost|127\.0\.0\.1/.test(location.hostname)) return;
+    const candidates = [
+      (location.pathname.replace(/\/[^\/]*$/, '') || '/') + '/livereload.php',
+      '/server/public/livereload.php',
+      '/livereload.php',
+      '/Cafe-lounge/server/public/livereload.php',
+      '/Cafe-lounge/livereload.php'
+    ];
+    let endpoint = null; let last = 0;
+    async function probe(){
+      for (const c of candidates){
+        try{ const r = await fetch(c + '?_=' + Date.now(), {cache:'no-store'}); if (r.ok){ endpoint = c; return; } }catch(e){}
+      }
+    }
+    async function check(){
+      try{
+        if (!endpoint) { await probe(); if (!endpoint) return; }
+        const r = await fetch(endpoint + '?_=' + Date.now(), {cache:'no-store'});
+        if (!r.ok) return;
+        const j = await r.json(); const m = j.mtime || 0;
+        if (last && m > last){ console.log('LiveReload: change detected, reloading'); location.reload(true); }
+        last = m;
+      }catch(e){}
+    }
+    setInterval(check, 1500);
+    if (document.readyState === 'complete') check(); else window.addEventListener('load', check);
+  })();
+  </script>
 </head>
 <body class="cl-header font-sans">
 <script>

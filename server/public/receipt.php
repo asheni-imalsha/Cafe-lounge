@@ -156,7 +156,7 @@ require_once __DIR__ . '/../views/partials/header.php';
       <!-- Footer -->
       <div class="footer-note">
         <p>Cafe Lounge • 123 Coffee Street, Colombo</p>
-        <p>📞 +94 11 234 5678 | 📧 hello@cafelounge.lk</p>
+        <p> +94 11 234 5678 |  hello@cafelounge.lk</p>
         <div class="thankyou-text">Thank you for choosing us! We hope to serve you again soon.</div>
       </div>
     </div>

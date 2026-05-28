@@ -47,11 +47,11 @@ $user_id = getCurrentUserId();
         
         <!-- Quantity Controls -->
         <div class="flex items-center gap-3">
-          <button class="qty-decrease w-8 h-8 rounded-full flex items-center justify-center transition-colors" style="background:#f0ebe5;color:var(--espresso);border:none;cursor:pointer">−</button>
+          <button class="qty-decrease w-8 h-8 rounded-full flex items-center justify-center transition-colors" data-cart-id="<?= htmlspecialchars($cartRowId) ?>" data-item-id="<?= htmlspecialchars($itemId) ?>" style="background:#f0ebe5;color:var(--espresso);border:none;cursor:pointer">−</button>
           <div class="qty-display">
             <span class="qty-value font-semibold text-lg min-w-[30px] text-center inline-block"><?= (int)$it['quantity'] ?></span>
           </div>
-          <button class="qty-increase w-8 h-8 rounded-full flex items-center justify-center transition-colors" style="background:var(--espresso);color:white;border:none;cursor:pointer">+</button>
+          <button class="qty-increase w-8 h-8 rounded-full flex items-center justify-center transition-colors" data-cart-id="<?= htmlspecialchars($cartRowId) ?>" data-item-id="<?= htmlspecialchars($itemId) ?>" style="background:var(--espresso);color:white;border:none;cursor:pointer">+</button>
         </div>
         
         <!-- Line Total & Remove -->
